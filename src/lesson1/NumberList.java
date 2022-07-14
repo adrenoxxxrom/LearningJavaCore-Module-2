@@ -1,21 +1,6 @@
 package lesson1;
 
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-//Создать свою реализацию List - (Number list). Она может работать только с Numbers (Generics)
-//Особенности переопределения методов
-//1. Метод add - который добавляет в начало массива
-//2. Метод remove - удаляет все элементы массива
-//3. Метод contains - возвращает true, только если таких элементов больше или равно 2
-//
-//Особенности новых методов
-//1. Метод getDouble(int index), будет возвращать элемент типа Double по указанному индексу, или кидать ошибку
-//2. Метод sumIntegers(), будет давать сумму всех чисел, если array - Integer, иначе кидать ошибку
-
-//Опциально(По желанию)
-//Закончить MyList класс - дописать оставшиешься методы, кроме итератор и toArray()
 
 public class NumberList<T extends Number> implements List<T> {
 
@@ -27,26 +12,18 @@ public class NumberList<T extends Number> implements List<T> {
         this.array = new Object[DEFAULT_CAPACITY];
     }
 
-    @Override
-    public boolean add(T num) {
-        grow();
-        size++;
-        array[array.length - size] = num;
-        return true;
-    }
+    //начало домашнего задания
 
-    public void grow() {
-        if(array.length == size) {
-            Object[] newArray = new Object[(int) (array.length * 1.5)];
-            int differenceLength = newArray.length - array.length;
-            System.arraycopy(array, 0, newArray, differenceLength, size);
-            array = newArray;
+    public boolean addReverseOrder(T num) {
+        if (array.length >= size) {
+            grow();
+            Object[] elementToOffset = Arrays.copyOfRange(array, 0, array.length - 1);
+            System.arraycopy(elementToOffset, 0, array, 1, elementToOffset.length);
+            array[0] = num;
+            size++;
+
         }
-    }
-
-    @Override
-    public boolean remove(Object o) {
-        return false;
+        return true;
     }
 
     @Override
@@ -67,10 +44,81 @@ public class NumberList<T extends Number> implements List<T> {
                 if (counter >= 2) {
                     return true;
                 }
-
             }
         }
         return false;
+    }
+
+    public boolean removeObj(Object o) {
+        boolean result = false;
+        int count = 0;
+
+        for (int i = 0; i < array.length; i++) {
+            if (o.equals(array[i])) {
+                result = true;
+                array[i] = null;
+                size--;
+            } else if (array[i] != null) {
+                count++;
+            }
+        }
+
+        Object[] tmp = new Object[count];
+        for (int i = 0, c = 0; i < array.length; i++) {
+            if (array[i] != null) {
+                tmp[c] = array[i];
+                c++;
+            }
+        }
+        array = tmp;
+        return result;
+    }
+
+    public Object getDouble(int index) {
+        if (array[index] instanceof Double) {
+            return array[index];
+        } else {
+            throw new NumberFormatException("Число "
+                    + array[index]
+                    + " с индексом "
+                    + index
+                    + " не является Double");
+
+        }
+    }
+
+    public Integer sumIntegers() {
+        int sum = 0;
+
+        for (Object o : array) {
+            if (o instanceof Integer) {
+                sum = sum + (int) o;
+            } else throw new NumberFormatException("Err: not an Integer");
+        }
+        return sum;
+    }
+
+    //конец домашнего задания
+
+    @Override
+    public boolean add(T num) {
+        if (array.length >= size) {
+            grow();
+            array[size] = num;
+            size++;
+        }
+        return true;
+    }
+
+    @Override
+    public void add(int index, T num) {
+        array[index] = num;
+
+    }
+
+    public void grow() {
+        array = Arrays.copyOf(array, size + 1);
+
     }
 
     public int counter(Object num) {
@@ -85,22 +133,43 @@ public class NumberList<T extends Number> implements List<T> {
 
     @Override
     public int size() {
+        System.out.println(size);
         return size;
     }
 
     @Override
     public String toString() {
-        Stream<String> stringStream = Arrays.stream(array).map(String::valueOf);
-        String data = "[" + stringStream.collect(Collectors.joining(", ")) + "]";
-        String result = data.replaceAll("null, ", "");
+
 
         return "NumberList{" +
-                "array=" + result +
+                "array=" + Arrays.toString(array) +
                 '}';
     }
 
     @Override
+    public void clear() {
+        for (int i = 0; i < size; i++)
+            array[i] = null;
+        size = 0;
+    }
+
+    public void printArrayInfo(String s) {
+
+        System.out.println("\n" + s + "\n"
+                + "Array:" + Arrays.toString(array) + "\n"
+                + "Array length: " + array.length + "\n"
+                + "List size: " + size);
+
+
+    }
+
+    @Override
     public boolean isEmpty() {
+        return false;
+    }
+
+    @Override
+    public boolean remove(Object o) {
         return false;
     }
 
@@ -144,10 +213,6 @@ public class NumberList<T extends Number> implements List<T> {
         return false;
     }
 
-    @Override
-    public void clear() {
-
-    }
 
     @Override
     public T get(int index) {
@@ -159,10 +224,6 @@ public class NumberList<T extends Number> implements List<T> {
         return null;
     }
 
-    @Override
-    public void add(int index, T element) {
-
-    }
 
     @Override
     public T remove(int index) {
@@ -193,4 +254,6 @@ public class NumberList<T extends Number> implements List<T> {
     public List<T> subList(int fromIndex, int toIndex) {
         return null;
     }
+
+
 }
